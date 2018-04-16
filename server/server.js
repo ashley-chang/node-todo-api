@@ -1,5 +1,6 @@
 var express = require('express');
 var bodyParser = require('body-parser');
+var {ObjectID} = require('mongodb');
 
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
@@ -31,6 +32,25 @@ app.get('/todos', (req, res) => {
     res.send({todos}); //using object as opposed to array opens up flexibility
   }, (e) => {
     res.status(400).send(e);
+  });
+});
+
+//:id creates id variable on req obj that can be accessed
+app.get('/todos/:id', (req, res) => {
+  var id = req.params.id;
+  //validate ID using isValid
+    //stop function exec and respond with 404
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
+  
+  Todo.findById(id).then((todo) => {
+    if (!todo) {
+      res.status(404).send();
+    }
+    res.status(200).send({todo});
+  }).catch((e) => {
+    res.status(400).send();
   });
 });
 
